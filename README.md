@@ -9,6 +9,55 @@ This chart allows for easy deployment and configuration of the API server across
 
 ## Repository Structure
 
+```mermaid
+graph TB
+    subgraph Kubernetes["Kubernetes Cluster"]
+        subgraph mon["Monitoring Namespace"]
+            PROM["Prometheus Stack"]
+            GRAF["Grafana"]
+            ALERT["Alertmanager"]
+            KSM["Kube State Metrics"]
+            NODE["Node Exporter"]
+            SM["Service Monitor"]
+            
+            PROM --> GRAF
+            PROM --> ALERT
+            PROM --> KSM
+            PROM --> NODE
+            SM --> PROM
+        end
+
+        subgraph def["Default Namespace"]
+            API["Rust API Server"]
+            DB[("PostgreSQL")]
+            
+            API --> DB
+        end
+
+        SM -.- API
+    end
+
+    subgraph Helm["Helm Charts"]
+        HC1["postgresql-chart"]
+        HC2["api-chart"]
+        HC3["kube-prometheus-stack"]
+    end
+
+    HC1 --> DB
+    HC2 --> API
+    HC3 --> PROM
+
+    classDef namespace fill:#326ce5,stroke:#fff,stroke-width:2px,color:#fff
+    classDef app fill:#00c7b7,stroke:#fff,stroke-width:2px,color:#fff
+    classDef monitoring fill:#e6522c,stroke:#fff,stroke-width:2px,color:#fff
+    classDef helm fill:#0F1689,stroke:#fff,stroke-width:2px,color:#fff
+
+    class mon,def namespace
+    class API,DB app
+    class PROM,GRAF,ALERT,KSM,NODE,SM monitoring
+    class HC1,HC2,HC3 helm
+```
+
 ```
 .
 ├── helm
@@ -113,11 +162,11 @@ To access the API from outside the cluster, you may need to set up an Ingress or
 
 The API deployment includes liveness and readiness probes configured to check the `/health` endpoint on port 8080.
 These ensure that Kubernetes can monitor the health of your API pods.
-
+![img_1.png](img_1.png)
 ### Metrics
 
 The service is configured with annotations for Prometheus to scrape metrics from the `/metrics` endpoint on port 8080.
-
+![img.png](img.png)
 ## Data Flow
 
 The Rust API server follows a typical request-response flow:
