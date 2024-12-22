@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-api-config
+data:
+  DATABASE_URL: {{ .Values.configmap.DATABASE_URL | quote }}
+  HOST: {{ .Values.configmap.HOST | quote }}
+  PORT: {{ .Values.configmap.PORT | quote }}
+  RUST_LOG: {{ .Values.configmap.RUST_LOG | quote }}
